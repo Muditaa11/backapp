@@ -14,22 +14,22 @@ router.post('/register', async(req, res) => {
   try {
     const { email, username, password } = req.body;
     if (!email || !username || !password) {
-      return res.status(400).send('Username and password are required');
+      return res.status(400).json({ error: 'Username, email and password are required' });
     }
 
     if (password.length < 6) {
-      return res.status(400).send('Password must be at least 6 characters long');
+      return res.status(400).json({ error: 'Password must be at least 6 characters long' });
     }
 
     //check if user exists in db
     const existingUser = await User.findOne({ email });
     const existingUsername = await User.findOne({ username });
     if (existingUser) {
-      return res.status(400).send('User already exists');
+      return res.status(400).json({ error: 'User already exists' });
     }
 
     if (existingUsername) {
-      return res.status(400).send('Username already exists'); 
+      return res.status(400).json({ error: 'Username already exists' });
     } 
 
     const profileImage = `https://ui-avatars.com/api/?name=${username}&background=random`;
@@ -52,8 +52,8 @@ router.post('/register', async(req, res) => {
       },
     });
   } catch (error) {
-    console.error(error); 
-    res.status(500).send('Server error');
+    console.error('Error in register route:', error); 
+    res.status(500).json({ error: 'Server error' });
   }
 });
 
@@ -61,17 +61,17 @@ router.post('/login', async (req, res) => {
     try {
       const { email, password } = req.body;
       if (!email || !password) {
-        return res.status(400).send('Email and password are required');
+        return res.status(400).json({ error: 'Email and password are required' });
       }
 
       const user = await User.findOne({ email });
       if (!user) {
-        return res.status(400).send('Invalid credentials');
+        return res.status(400).json({ error: 'Invalid credentials' });
       }
 
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) {
-        return res.status(400).send('Invalid credentials');
+        return res.status(400).json({ error: 'Invalid credentials' });
       }
 
       const token = generateAuthToken(user._id);
@@ -86,8 +86,8 @@ router.post('/login', async (req, res) => {
         },
       }); 
     } catch (error) {
-      console.error("Error in login route", error);
-      res.status(500).send('Server error'); 
+      console.error("Error in login route:", error);
+      res.status(500).json({ error: 'Server error' }); 
     }
 });
 
